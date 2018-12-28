@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Microservices Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+  <style>
+    body {
+      margin-top: 30px;
+      margin-left: 30px;
+    }
+
+    #results {
+      display: none;
+    }
+
+    #noBullet {
+      list-style: none;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      const baseUrl = 'http://localhost:9090';
+      const userPost = `${baseUrl}/api/users/`
+      const prodPost = `${baseUrl}/api/products/`
+      const orderPost = `${baseUrl}/api/orders/`
+      $("#userSave").on('click', function () {
+        var payload = {
+          firstName: $("#firstName").val(),
+          lastName: $("#lastName").val(),
+          user_id: $("#userId").val(),
+          address: $("#address").val(),
+          email: $("#email").val(),
+          phone: $("#phone").val(),
+        };
+        console.log(payload);
+        fetch(userPost, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(res => res.json())
+          .then(response => {
+            console.log(response.user.user_id);
+            $('#results').show();
+            $('#userResult').append(`<li>${response.user.user_id}</li>`)
+          })
+          .catch(error => console.error('Error:', error));
+      })
+      $("#productSave").on('click', function () {
+        var payload = {
+          name: $("#prodName").val(),
+          cateory: $("#prodCategory").val()
+        };
+        console.log(payload);
+        fetch(prodPost, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(res => res.json())
+          .then(response => {
+            console.log(response.product.name);
+            $('#results').show();
+            $('#productResult').append(`<li>${response.product.name}</li>`)
+          })
+          .catch(error => console.error('Error:', error));
+      })
+      $("#orderSave").on('click', function () {
+        var payload = {
+          user: $("#orderUser").val(),
+          product: $("#orderProduct").val(),
+          units: $("#orderUnits").val(),
+        };
+        console.log(payload);
+        fetch(orderPost, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(res => res.json())
+          .then(response => {
+            console.log(response.order.order_id)
+            $('#results').show();
+            $('#orderResult').append(`<li>${response.order.order_id}</li>`)
+          })
+          .catch(error => console.error('Error:', error));
+      })
+      $("#orderSearch").on('click', function () {
+        var param = $("#orderId").val()
+        const orderSearch = `${orderPost}${param}`
+        fetch(orderSearch, {
+            method: 'GET',
+          }).then(res => res.json())
+          .then(response => {
+            console.log(response);
+            if (!response.order) {
+              alert('Order Does not exist!');
+            }
+            $('#searchResult').empty();
+            const orderBody =
+              `<h3>Order Details:</h3><ul id="noBullet">
+              <li>Order ID: ${response.order.order_id}</li>
+              <li>Product Name: ${response.prodData.product.name}</li>
+              <li>Product Category: ${response.prodData.product.cateory}</li>
+              <li>User Name: ${response.userData.user.firstName} ${response.userData.user.lastName}</li>
+              <li>User ID: ${response.userData.user.user_id}</li>
+              <li>User Address: ${response.userData.user.address}</li>
+              <li>User Contact: ${response.userData.user.phone}</li>
+              <li>User Email: ${response.userData.user.email}</li>
+              </ul>`
+            $('#results').show();
+            $('#searchResult').append(orderBody);
+            // console.log(response.order.order_id)
+            // $('#orderResult').append(`<li>${response.order.order_id}</li>`)
+          })
+          .catch(error => console.error('Error:', error));
+      })
+    });
+  </script>
+</head>
+
+<body>
+  <div class="row">
+    <div class="col-sm-3">
+      <h2>User panel</h2>
+      <form id="userForm">
+        <div class="form-group">
+          <label for="firstName">First Name:</label>
+          <input type="firstName" class="form-control" id="firstName">
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name:</label>
+          <input type="lastName" class="form-control" id="lastName">
+        </div>
+        <div class="form-group">
+          <label for="userId">User ID:</label>
+          <input type="userId" class="form-control" id="userId">
+        </div>
+        <div class="form-group">
+          <label for="address">Address:</label>
+          <input type="address" class="form-control" id="address">
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone:</label>
+          <input type="phone" class="form-control" id="phone">
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" class="form-control" id="email">
+        </div>
+        <button id="userSave" type="button" class="btn btn-default">Submit</button>
+      </form>
+    </div>
+    <div class="col-sm-3">
+      <h2>Product panel</h2>
+      <form id="productForm">
+        <div class="form-group">
+          <label for="name">Name:</label>
+          <input type="name" class="form-control" id="prodName">
+        </div>
+        <div class="form-group">
+          <label for="category">Category:</label>
+          <input type="category" class="form-control" id="prodCategory">
+        </div>
+        <button id="productSave" type="button" class="btn btn-default">Submit</button>
+      </form>
+    </div>
+    <div class="col-sm-3">
+      <h2>Order panel</h2>
+      <form id="orderForm">
+        <div class="form-group">
+          <label for="user">User:</label>
+          <input type="user" class="form-control" id="orderUser">
+        </div>
+        <div class="form-group">
+          <label for="product">Product:</label>
+          <input type="product" class="form-control" id="orderProduct">
+        </div>
+        <div class="form-group">
+          <label for="units">Units:</label>
+          <input type="units" class="form-control" id="orderUnits">
+        </div>
+        <button id="orderSave" type="button" class="btn btn-default">Submit</button>
+    </div>
+    <div class="col-sm-3">
+      <h2>Search Order</h2>
+      <form id="searchForm">
+        <div class="form-group">
+          <label for="order">Order ID:</label>
+          <input type="order" class="form-control" id="orderId">
+        </div>
+        <button id="orderSearch" type="button" class="btn btn-default">Submit</button>
+      </form>
+    </div>
+    </form>
+  </div>
+  </div>
+  <div class="row" id="results">
+    <div class="col-sm-3">
+      <h2>Users:</h2>
+      <div id="userResult">
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <h2>Products:</h2>
+      <div id='productResult'>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <h2>Orders:</h2>
+      <div id='orderResult'>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <h2>Search Results:</h2>
+      <div id='searchResult'>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
